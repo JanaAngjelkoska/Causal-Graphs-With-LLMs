@@ -6,36 +6,36 @@ Causal-Graphs-With-LLMs is a Python project for constructing, evaluating, and vi
 
 ```
 CausalGraphsWithLLMs/
-├── __init__.py
-├── poetry.lock
-├── pyproject.toml
+├── __init__.py                         # Marks root package
+├── poetry.lock                         # Poetry lock file for exact dependency versions
+├── pyproject.toml                       # Project metadata & dependencies
 └── causal_graphs_llm/
-    ├── __init__.py
-    ├── core/
-    │   ├── pipeline.py
-    │   └── stages/
-    │       ├── expansion.py
-    │       ├── initialization.py
-    │       └── insertion.py
-    ├── evaluation/
-    │   ├── evaluator.py
-    │   ├── visualizer.py
-    │   └── ground_truth_graphs/
-    │       ├── asia
-    │       ├── child
-    │       └── neuropathic
-    ├── graphs/
-    │   └── builder.py
-    ├── models/
-    │   └── causal.py
-    ├── prompts/
+    ├── __init__.py                     # Marks main package
+    ├── core/                           # Core pipeline logic
+    │   ├── pipeline.py                 # Orchestrates initialization → expansion → insertion stages
+    │   └── stages/                     # Stage-specific procedures
+    │       ├── expansion.py            # Finds variables caused by the current variable
+    │       ├── initialization.py       # Finds variables with no causes (BFS queue start)
+    │       └── insertion.py            # Adds edges without creating cycles
+    ├── evaluation/                     # Evaluation & visualization tools
+    │   ├── evaluator.py                # Compares predicted vs ground truth graphs
+    │   ├── visualizer.py               # Graph plotting & diagram generation
+    │   └── ground_truth_graphs/        # Benchmark datasets for testing
+    │       ├── asia                    # Asia dataset
+    │       ├── child                   # Child dataset
+    │       └── neuropathic             # Neuropathic pain dataset
+    ├── graphs/                         # Graph construction logic
+    │   └── builder.py                  # Builds causal graph data structures
+    ├── models/                         # Data models (Pydantic, domain objects)
+    │   └── causal.py                   # Node, Edge, Graph model definitions
+    ├── prompts/                        # Prompt engineering for LLM queries
     │   ├── __init__.py
-    │   ├── extraction_prompt.py
-    │   └── initialization_prompt.py
-    └── services/
-        ├── base_extractor.py
-        ├── config.py
-        └── extractor.py
+    │   ├── extraction_prompt.py        # Prompts for variable relationship extraction
+    │   └── initialization_prompt.py    # Prompts for identifying initial variables
+    └── services/                       # LLM interaction layer
+        ├── base_extractor.py           # Abstract base class for extractors
+        ├── config.py                   # Service configuration (model, API keys, etc.)
+        └── extractor.py                # Implementation of LLM query & response parsing
 ```
 
 ## Main Components
@@ -46,6 +46,10 @@ CausalGraphsWithLLMs/
 - **models/causal.py**: Causal graph model definitions.
 - **prompts/**: Prompt templates for LLM-based extraction and initialization.
 - **services/**: Service classes for extraction and configuration.
+
+  ## Flowchart of processes and module usages
+
+<img width="1334" height="848" alt="flowchart" src="https://github.com/user-attachments/assets/504b2d81-905c-4de4-a1c5-9a7cde49be2e" />
 
 ## Getting Started
 1. Install Poetry (if not already installed):
@@ -58,9 +62,14 @@ CausalGraphsWithLLMs/
    ```
 3. Run the pipeline or evaluation scripts as needed.
 
-## License
-Specify your license here.
 
-## Contact
-Add contact information or links for contributions.
+## References
+
+- **Can Large Language Models Build Causal Graphs?**: This paper shows that LLMs like GPT-3 can assist in building causal graphs, but expert verification is still necessary due to possible errors and omissions. [Read the paper](https://arxiv.org/pdf/2303.05279)
+
+- **Efficient Causal Graph Discovery Using Large Language Models**: This work introduces a breadth-first search method with LLMs for efficient causal graph discovery, achieving state-of-the-art results without requiring observational data. [Read the paper](https://arxiv.org/pdf/2402.01207)
+
+
+
+
 
