@@ -61,9 +61,9 @@ CausalGraphsWithLLMs/
 
 ## References
 
-- **Can Large Language Models Build Causal Graphs?**: This paper shows that LLMs like GPT-3 can assist in building causal graphs, but expert verification is still necessary due to possible errors and omissions. [Read the paper](https://arxiv.org/abs/2306.16480)
+- **Can Large Language Models Build Causal Graphs?**: This paper shows that LLMs like GPT-3 can assist in building causal graphs, but expert verification is still necessary due to possible errors and omissions. [Read the paper](https://arxiv.org/pdf/2303.05279)
 
-- **Efficient Causal Graph Discovery Using Large Language Models**: This work introduces a breadth-first search method with LLMs for efficient causal graph discovery, achieving state-of-the-art results without requiring observational data. [Read the paper](https://arxiv.org/abs/2310.02274)
+- **Efficient Causal Graph Discovery Using Large Language Models**: This work introduces a breadth-first search method with LLMs for efficient causal graph discovery, achieving state-of-the-art results without requiring observational data. [Read the paper](https://arxiv.org/pdf/2402.01207)
 
 
 
