@@ -57,10 +57,3 @@ CausalGraphsWithLLMs/
    poetry install
    ```
 3. Run the pipeline or evaluation scripts as needed.
-
-## License
-Specify your license here.
-
-## Contact
-Add contact information or links for contributions.
-
