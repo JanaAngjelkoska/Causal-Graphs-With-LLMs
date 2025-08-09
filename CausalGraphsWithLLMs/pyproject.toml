@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "causal-graphs-llm"
+version = "0.1.0"
+description = "LLM-powered framework for causal graph discovery from text"
+authors = ["Your Name <your@email.com>"]
+
+packages = [
+    { include = "causal_graphs_llm" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.5"
+networkx = "^3.2"
+matplotlib = "^3.9"
+python-dotenv = "^1.0"
+scikit-learn = "^1.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2"
+black = "^24.4"
+ruff = "^0.4"
+mypy = "^1.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
