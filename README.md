@@ -47,6 +47,11 @@ CausalGraphsWithLLMs/
 - **prompts/**: Prompt templates for LLM-based extraction and initialization.
 - **services/**: Service classes for extraction and configuration.
 
+  ## Flowchart of processes and module usages
+<img width="1334" height="858" alt="flowchart" src="https://github.com/user-attachments/assets/01cd0d38-e4db-4ff8-ac44-39a277240180" />
+
+  
+
 ## Getting Started
 1. Install Poetry (if not already installed):
    ```bash
