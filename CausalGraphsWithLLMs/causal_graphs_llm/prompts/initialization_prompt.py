@@ -7,5 +7,5 @@ According to X ...
 """
 
 
-def create_extraction_prompt(baseline: str) -> str:
+def create_initialization_prompt(baseline: str) -> str:
     pass
