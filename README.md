@@ -2,6 +2,9 @@
 
 Causal-Graphs-With-LLMs is a Python project for constructing, evaluating, and visualizing causal graphs using Large Language Models (LLMs). It provides a modular pipeline for graph building, prompt-based extraction, and evaluation against ground truth datasets.
 
+## Project Structure
+
+```
 CausalGraphsWithLLMs/
 ├── __init__.py                         # Marks root package
 ├── poetry.lock                         # Poetry lock file for exact dependency versions
@@ -33,7 +36,7 @@ CausalGraphsWithLLMs/
         ├── base_extractor.py           # Abstract base class for extractors
         ├── config.py                   # Service configuration (model, API keys, etc.)
         └── extractor.py                # Implementation of LLM query & response parsing
-
+```
 
 ## Main Components
 - **core/pipeline.py**: Orchestrates the causal graph construction pipeline.
