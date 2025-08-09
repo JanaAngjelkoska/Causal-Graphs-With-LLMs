@@ -48,9 +48,8 @@ CausalGraphsWithLLMs/
 - **services/**: Service classes for extraction and configuration.
 
   ## Flowchart of processes and module usages
-<img width="1334" height="858" alt="flowchart" src="https://github.com/user-attachments/assets/01cd0d38-e4db-4ff8-ac44-39a277240180" />
 
-  
+<img width="1334" height="848" alt="flowchart" src="https://github.com/user-attachments/assets/504b2d81-905c-4de4-a1c5-9a7cde49be2e" />
 
 ## Getting Started
 1. Install Poetry (if not already installed):
