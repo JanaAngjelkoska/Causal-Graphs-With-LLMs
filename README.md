@@ -1,2 +1,63 @@
 # Causal-Graphs-With-LLMs
-This project investigates methods for constructing accurate and interpretable causal graphs directly from natural language descriptions using Large Language Models (LLMs).
+
+Causal-Graphs-With-LLMs is a Python project for constructing, evaluating, and visualizing causal graphs using Large Language Models (LLMs). It provides a modular pipeline for graph building, prompt-based extraction, and evaluation against ground truth datasets.
+
+CausalGraphsWithLLMs/
+├── __init__.py                         # Marks root package
+├── poetry.lock                         # Poetry lock file for exact dependency versions
+├── pyproject.toml                       # Project metadata & dependencies
+└── causal_graphs_llm/
+    ├── __init__.py                     # Marks main package
+    ├── core/                           # Core pipeline logic
+    │   ├── pipeline.py                 # Orchestrates initialization → expansion → insertion stages
+    │   └── stages/                     # Stage-specific procedures
+    │       ├── expansion.py            # Finds variables caused by the current variable
+    │       ├── initialization.py       # Finds variables with no causes (BFS queue start)
+    │       └── insertion.py            # Adds edges without creating cycles
+    ├── evaluation/                     # Evaluation & visualization tools
+    │   ├── evaluator.py                # Compares predicted vs ground truth graphs
+    │   ├── visualizer.py               # Graph plotting & diagram generation
+    │   └── ground_truth_graphs/        # Benchmark datasets for testing
+    │       ├── asia                    # Asia dataset
+    │       ├── child                   # Child dataset
+    │       └── neuropathic             # Neuropathic pain dataset
+    ├── graphs/                         # Graph construction logic
+    │   └── builder.py                  # Builds causal graph data structures
+    ├── models/                         # Data models (Pydantic, domain objects)
+    │   └── causal.py                   # Node, Edge, Graph model definitions
+    ├── prompts/                        # Prompt engineering for LLM queries
+    │   ├── __init__.py
+    │   ├── extraction_prompt.py        # Prompts for variable relationship extraction
+    │   └── initialization_prompt.py    # Prompts for identifying initial variables
+    └── services/                       # LLM interaction layer
+        ├── base_extractor.py           # Abstract base class for extractors
+        ├── config.py                   # Service configuration (model, API keys, etc.)
+        └── extractor.py                # Implementation of LLM query & response parsing
+
+
+## Main Components
+- **core/pipeline.py**: Orchestrates the causal graph construction pipeline.
+- **core/stages/**: Contains modules for different pipeline stages (expansion, initialization, insertion).
+- **evaluation/**: Tools for evaluating and visualizing generated graphs, with ground truth datasets.
+- **graphs/builder.py**: Utilities for building graph structures.
+- **models/causal.py**: Causal graph model definitions.
+- **prompts/**: Prompt templates for LLM-based extraction and initialization.
+- **services/**: Service classes for extraction and configuration.
+
+## Getting Started
+1. Install Poetry (if not already installed):
+   ```bash
+   pip install poetry
+   ```
+2. Install dependencies:
+   ```bash
+   poetry install
+   ```
+3. Run the pipeline or evaluation scripts as needed.
+
+## License
+Specify your license here.
+
+## Contact
+Add contact information or links for contributions.
+
