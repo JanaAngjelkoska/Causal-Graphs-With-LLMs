@@ -1,28 +1,23 @@
+import logging
 from collections import deque
+from typing import List
 
-from click import Tuple
+logger = logging.getLogger(__name__)
 
 
-def expansion_stage(queue: deque, edges: Tuple[str], visited: Tuple[str]):
+def expansion_stage(variable: str, effects: List[str], visited: deque[str]):
     """
-    Finds which variables are caused by the first variable in the queue,
-    queue: deque of variables to process
-    edges: list of (cause, effect) tuples
-    visited: set of already processed variables
-    :return: cause, list_of_effects
+    Finds which variables are caused by the first variable in the queue.
+    Returns:
+         cause, list_of_effects
     """
-    pass
+    logger.info(f"Expanding variable: {variable}")
+    logger.info(f"Current effects: {effects}")
+    logger.info(f"Visited before: {list(visited)}")
 
-# so here's the flow:
-#
-# Firstly, the service should be configured to communicate with an LLM (configured agent we call "extractor") and in the pipeline.py we run the stages:
-#
-# 1. User baseline query (a text with variables and causes)
-# 2. Creating a better prompt in initialization_prompt.py with create_initialization_prompt()
-# 3. Send the initialization prompt to a LLM service
-# 4. using pydantic, structure the output in a JSON of the LLM service -> these are independent vars,  format with pydantic from causal.py
-# 5. Initialization stage ->  variables that are not caused by other variables and adds them to a BFS queue
-# 6. Creating a better prompt in expansion_prompt.py with create_expansion_prompt()
-# 7. Send the expansion prompt to a LLM service
-# 8. Extract the information in a JSON format with pydantic from causal.py
-# 9. Use the expansion.py to use the JSON format -> Finds which variables are caused by the first variable in the queue
+    visited.remove(variable)
+    for effect in effects:
+        visited.append(effect)
+
+    logger.info(f"Visited after: {list(visited)}")
+    return visited

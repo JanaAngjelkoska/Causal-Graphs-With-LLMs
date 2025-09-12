@@ -1,21 +1,29 @@
+"""
+Handles all interaction with an LLM for extracting variables and relations from text.
+"""
 from abc import ABC, abstractmethod
+from typing import List
+
 from causal_graphs_llm.services.config import ExtractorConfig
 
 
 class BaseAgent(ABC):
-    """
-    Handles all interaction with an LLM for extracting variables and relations from text.
-    """
 
     def __init__(self, config: ExtractorConfig):
         self.config = config
 
     @abstractmethod
-    def initialization_query(self, prompt: str):
+    def initialization_query(self, prompt):
+        """
+        Given a prompt, query the LLM and return structured output used in the initialization stage.
+        """
         pass
 
     @abstractmethod
-    def extraction_query(self, prompt: str):
+    def extraction_query(self, cause: str, effect: List[str]):
+        """
+        Given a prompt, query the LLM and return structured output in the extraction stage.
+        """
         pass
 
     @abstractmethod

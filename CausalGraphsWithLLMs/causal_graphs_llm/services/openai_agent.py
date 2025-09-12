@@ -1,52 +1,140 @@
+"""
+Handles all interaction with an LLM for extracting variables and relations from text,
+using GitHub GPT-5 via Azure-style API with JSON output.
+"""
 import os
-import openai
-from json import JSONDecodeError
-from dotenv import load_dotenv
-load_dotenv()
-from causal_graphs_llm.prompts.extraction_prompt import create_extraction_prompt
-from causal_graphs_llm.prompts.initialization_prompt import create_initialization_prompt
-from causal_graphs_llm.models.causal import InitializationResponse, ExpansionResponse
+import json
+import logging
+from typing import List
+
+try:
+    import colorlog
+
+    handler = colorlog.StreamHandler()
+    handler.setFormatter(colorlog.ColoredFormatter(
+        '%(log_color)s%(levelname)s:%(name)s:%(message)s',
+        log_colors={
+            'info()': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'bold_red',
+        }
+    ))
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
+    logger = colorlog.getLogger(__name__)
+except ImportError:
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+from azure.ai.inference import ChatCompletionsClient
+from azure.ai.inference.models import SystemMessage, UserMessage
+from azure.core.credentials import AzureKeyCredential
+
 from causal_graphs_llm.services.base_agent import BaseAgent
 from causal_graphs_llm.services.config import ExtractorConfig
+from causal_graphs_llm.models.causal import InitializationResponse, ExpansionResponse
+from causal_graphs_llm.prompts.extraction_prompt import create_extraction_prompt
+from causal_graphs_llm.prompts.initialization_prompt import create_initialization_prompt
+from causal_graphs_llm.services.helpers.json_parser import clean_llm_json
+
+logger.info("Initializing GitHubLLMAgent...")
 
 
-class OpenAIAgent(BaseAgent):
+class GitHubLLMAgent(BaseAgent):
     def __init__(self, config: ExtractorConfig):
         super().__init__(config)
-        openai.api_key = config.api_key or os.getenv("OPENAI_API_KEY")
-        if config.api_base:
-            openai.api_base = config.api_base
+
+        token = os.environ.get("GITHUB_TOKEN")
+        if not token:
+            raise ValueError("GITHUB_TOKEN environment variable not set.")
+        else:
+            logger.info("GITHUB_TOKEN found in environment variables.")
+
+        self.client = ChatCompletionsClient(
+            endpoint=config.endpoint,
+            credential=AzureKeyCredential(token)
+        )
+        logger.info(f"Connected to LLM endpoint: {config.endpoint}")
+
+        self.model = config.model
+        self.max_tokens = config.max_tokens
+        logger.info(f"Using model: {self.model}, max tokens: {self.max_tokens}")
 
     def _query_llm(self, prompt: str) -> str:
-        response = openai.chat.completions.create(
-            model=self.config.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
-        )
-        return response.choices[0].message["content"].strip()
+        """
+        Send a prompt to GitHub GPT-5 and return clean JSON string output.
+        """
+        logger.info("Sending query to GitHub GPT-5...")
+        logger.info(f"Prompt:\n{prompt}")
+
+        try:
+            response = self.client.complete(
+                messages=[
+                    SystemMessage("You are a helpful AI assistant that outputs JSON."),
+                    UserMessage(prompt)
+                ],
+                model=self.model
+            )
+        except Exception as e:
+            logger.error(f"Error communicating with LLM: {str(e)}")
+            raise
+
+        content = response.choices[0].message.content
+        logger.info(f"Raw LLM response content:\n{content}")
+
+        try:
+            json.loads(content)
+        except json.JSONDecodeError as e:
+            logger.error(f"Cleaned content is not valid JSON: {str(e)}")
+            raise
+
+        return content
 
     def initialization_query(self, prompt: str) -> InitializationResponse:
-        refined_prompt = create_initialization_prompt(prompt)
-        raw_output = self._query_llm(refined_prompt)
+        """
+        Sends the initialization prompt to the LLM and parses it into InitializationResponse.
+        """
+        logger.info("Running initialization query...")
+        full_prompt = create_initialization_prompt(prompt)
+        logger.info(f"Full initialization prompt:\n{full_prompt}")
+
+        raw_response = self._query_llm(full_prompt)
+
         try:
-            return InitializationResponse.model_validate_json(raw_output)
-        except JSONDecodeError:
-            raise ValueError(f"LLM returned invalid JSON for initialization: {raw_output}")
+            response_dict = clean_llm_json(raw_response)
+            if 'root_variables' in response_dict:
+                parsed = InitializationResponse.model_validate(response_dict)
+            elif 'choices' in response_dict:
+                content = response_dict["choices"][0]["message"]["content"]
+                variables_dict = clean_llm_json(content)
+                if "root_variables" not in variables_dict:
+                    wrapped = {"root_variables": variables_dict}
+                else:
+                    wrapped = variables_dict
+                parsed = InitializationResponse.model_validate(wrapped)
+            else:
+                parsed = InitializationResponse.model_validate({"root_variables": response_dict})
+            logger.info("Initialization query parsed successfully.")
+            return parsed
+        except Exception as e:
+            logger.error(f"Failed to parse initialization response: {str(e)}")
+            raise
 
-    def extraction_query(self, prompt: str) -> ExpansionResponse:
-        refined_prompt = create_extraction_prompt(prompt)
-        raw_output = self._query_llm(refined_prompt)
+    def extraction_query(self, cause: str, effect: List[str]) -> ExpansionResponse:
+        """
+        Sends an extraction query for a cause variable and its dependent effects.
+        """
+        logger.info(f"Running extraction query for cause: {cause}")
+        full_prompt = create_extraction_prompt(cause, effect)
+        logger.info(f"Full extraction prompt:\n{full_prompt}")
+
+        raw_response = self._query_llm(full_prompt)
         try:
-            return ExpansionResponse.model_validate_json(raw_output)
-        except JSONDecodeError:
-            raise ValueError(f"LLM returned invalid JSON for extraction: {raw_output}")
-
-if __name__ == "__main__":
-
-    config = ExtractorConfig()
-    print("Using OpenAI Extractor with model:", config.model)
-    agent = OpenAIAgent(config)
-    print("Initialized OpenAI Extractor")
-    response = agent.query_llm("Hello, how are you?")
-    print(response)
+            response_dict = clean_llm_json(raw_response)
+            parsed = ExpansionResponse.model_validate(response_dict)
+            logger.info(f"Extraction query parsed successfully for cause: {cause}")
+            return parsed
+        except Exception as e:
+            logger.error(f"Failed to parse extraction response for cause {cause}: {str(e)}")
+            raise
