@@ -16,7 +16,9 @@ if __name__ == '__main__':
     logger.info("Loaded ExtractorConfig.")
     agent = GitHubLLMAgent(config=config)
     logger.info("Initialized OpenAILLMAgent.")
-    graph = Pipeline().run_pipeline(agent=agent, query="Lack of sleep causes fatigue and poor concentration.")
+    graph = Pipeline().run_pipeline(agent=agent, query="After the heavy rainfall caused flooding in the city,"
+                                                       " the power outage led to hospital generator failure, "
+                                                       "which resulted in delayed patient treatments and increased mortality rates.")
     logger.info("Pipeline run complete. Building graph.")
     Builder().build_graph(graph=graph)
     logger.info("Graph building complete.")

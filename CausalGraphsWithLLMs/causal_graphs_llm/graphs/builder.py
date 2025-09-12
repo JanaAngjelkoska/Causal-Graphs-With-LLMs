@@ -1,3 +1,5 @@
+import random
+
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -24,7 +26,8 @@ class Builder:
 
         plt.title("Causal Graph")
         plt.axis('off')
-        plt.savefig("causal_graph.png")
+        idx = random.randint(0, 1000000)
+        plt.savefig(f"causal_graph_{idx}.png")
         logger = None
         try:
             import logging

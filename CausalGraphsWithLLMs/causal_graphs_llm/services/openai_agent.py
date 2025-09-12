@@ -9,7 +9,7 @@ from typing import List
 
 try:
     import colorlog
-
+    logger = colorlog.getLogger(__name__)
     handler = colorlog.StreamHandler()
     handler.setFormatter(colorlog.ColoredFormatter(
         '%(log_color)s%(levelname)s:%(name)s:%(message)s',
@@ -22,10 +22,9 @@ try:
         }
     ))
     logging.basicConfig(level=logging.INFO, handlers=[handler])
-    logger = colorlog.getLogger(__name__)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
 
 from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
@@ -36,7 +35,7 @@ from causal_graphs_llm.services.config import ExtractorConfig
 from causal_graphs_llm.models.causal import InitializationResponse, ExpansionResponse
 from causal_graphs_llm.prompts.extraction_prompt import create_extraction_prompt
 from causal_graphs_llm.prompts.initialization_prompt import create_initialization_prompt
-from causal_graphs_llm.services.helpers.json_parser import clean_llm_json
+from causal_graphs_llm.services.helpers.json_parser import clean_llm_content, clean_llm_json
 
 logger.info("Initializing GitHubLLMAgent...")
 
@@ -62,9 +61,6 @@ class GitHubLLMAgent(BaseAgent):
         logger.info(f"Using model: {self.model}, max tokens: {self.max_tokens}")
 
     def _query_llm(self, prompt: str) -> str:
-        """
-        Send a prompt to GitHub GPT-5 and return clean JSON string output.
-        """
         logger.info("Sending query to GitHub GPT-5...")
         logger.info(f"Prompt:\n{prompt}")
 
@@ -83,13 +79,21 @@ class GitHubLLMAgent(BaseAgent):
         content = response.choices[0].message.content
         logger.info(f"Raw LLM response content:\n{content}")
 
+        if not content or not content.strip():
+            logger.error("LLM response content is empty.")
+            raise ValueError("LLM response content is empty.")
+
+        cleaned = clean_llm_content(content)
+        logger.info(f"Cleaned LLM JSON content:\n{cleaned}")
+
+        # Try to parse cleaned content as JSON
         try:
-            json.loads(content)
-        except json.JSONDecodeError as e:
-            logger.error(f"Cleaned content is not valid JSON: {str(e)}")
+            clean_llm_json(cleaned)
+        except Exception as e:
+            logger.error(f"Cleaned content is not valid JSON: {str(e)}\nContent: {cleaned}")
             raise
 
-        return content
+        return cleaned
 
     def initialization_query(self, prompt: str) -> InitializationResponse:
         """
