@@ -52,35 +52,19 @@ class Pipeline:
 
     def _has_cycle(self, graph: Dict[str, List[str]], start_var: str, target_var: str) -> bool:
         """
-        Helper method to detect cycles using DFS.
-
-        Args:
-            graph: Dictionary representing the causal graph
-            start_var: Starting variable
-            target_var: Target variable to check for cycle
-        Returns:
-            bool: True if adding the edge creates a cycle, False otherwise
+        Helper method to detect if adding an edge from start_var to target_var creates a cycle.
+        Uses DFS from target_var to see if start_var is reachable.
         """
         visited = set()
-        rec_stack = set()
 
         def dfs(current_var: str) -> bool:
+            if current_var == start_var:
+                return True
             visited.add(current_var)
-            rec_stack.add(current_var)
-
             for neighbor in graph.get(current_var, []):
                 if neighbor not in visited:
                     if dfs(neighbor):
                         return True
-                elif neighbor in rec_stack:
-                    return True
-
-            rec_stack.remove(current_var)
             return False
 
-        if start_var not in graph:
-            graph[start_var] = []
-        graph[start_var].append(target_var)
-        has_cycle = dfs(start_var)
-        graph[start_var].remove(target_var)
-        return has_cycle
+        return dfs(target_var)
